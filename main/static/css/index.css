@@ -1,0 +1,61 @@
+/* static/css/style.css に保存するイメージ */
+
+/* 全体のフォントと余白 */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+/* 見出し */
+h1 {
+    text-align: center;
+}
+
+h2 {
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* ページネーションのボタン */
+button {
+    padding: 8px 16px;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px solid #333;
+    background-color: #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #ddd;
+}
+
+/* カレンダーのテーブル */
+table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto; /* 中央寄せ */
+}
+
+th, td {
+    border: 1px solid #333;
+    text-align: center;
+    padding: 10px;
+    vertical-align: top; /* textareaが上寄せ */
+    height: 80px;        /* 高さ固定 */
+}
+
+/* 曜日ヘッダーの背景色 */
+th {
+    background-color: #f2f2f2;
+}
+
+/* TODO入力用textarea */
+td textarea {
+    width: 90%;
+    height: 50px;
+    resize: none;
+    margin-top: 5px;
+}
