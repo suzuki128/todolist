@@ -1,9 +1,4 @@
-/* ------------------------------------------------
-   整理版 index.css
-   - 重複削除・タイポ修正
-   - レイアウトの衝突を避けるため共通設定はまとめる
-   - 既存の見た目を維持
-   ------------------------------------------------ */
+
 
 body {
     font-family: "メイリオ", sans-serif;
@@ -200,7 +195,7 @@ body {
     justify-content: center;
     width: 100%;
     height: 100%;
-    padding: 6px 4px;
+    padding: 6px 53px;
     font-size: 14px;
     font-weight: 700;
     color: #333;
