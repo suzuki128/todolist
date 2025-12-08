@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>TODOカレンダー</title>
+    <link rel="stylesheet" href="{{ url_for('main.static', filename='css/index.css') }}">
+</head>
+
+<body>
+    <div id="header">
+        <button id="prevBtn">← 前の月</button>
+        <h1 id="monthTitle"></h1>
+        <button id="nextBtn">次の月 →</button>
+    </div>
+
+
+
+    <div id="calendar">
+        <div class="calendar-container">
+
+            <!-- 曜日ヘッダー（ここを置き場所にする） -->
+            <div class="calendar-header">
+                <div class="day-label sunday">日</div>
+                <div class="day-label">月</div>
+                <div class="day-label">火</div>
+                <div class="day-label">水</div>
+                <div class="day-label">木</div>
+                <div class="day-label">金</div>
+                <div class="day-label saturday">土</div>
+            </div>
+
+            <!-- 日付セルを描画するグリッド -->
+            <div id="calendar-grid" class="calendar-grid"></div>
+
+        </div>
+    </div>
+
+
+    </div>
+
+    </div>
+
+    <div class="calendar-grid" id="calendar-grid"></div>
+
+    </div>
+
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span id="closeBtn" class="close">&times;</span>
+            <h2 id="modalDate"></h2>
+            <ul id="taskList"></ul>
+
+            <input type="text" id="taskInput" placeholder="タスク名（空欄可）">
+            <input type="text" id="detailInput" placeholder="詳細（空欄可）">
+            <button id="addTaskButton">追加</button>
+        </div>
+    </div>
+
+    <script src="{{ url_for('main.static', filename='js/index.js') }}"></script>
+</body>
+
+</html>
