@@ -1,9 +1,18 @@
+/* ------------------------------------------------
+   整理版 index.css
+   - 重複削除・タイポ修正
+   - レイアウトの衝突を避けるため共通設定はまとめる
+   - 既存の見た目を維持
+   ------------------------------------------------ */
+
 body {
     font-family: "メイリオ", sans-serif;
     margin: 20px;
     background: #f8f8f8;
+    box-sizing: border-box;
 }
 
+/* ヘッダー */
 #header {
     display: flex;
     justify-content: center;
@@ -11,23 +20,78 @@ body {
     gap: 20px;
 }
 
+/* カレンダーの親コンテナ（幅と中央寄せ） */
+.calendar-container,
 #calendar {
     width: 700px;
     margin: 20px auto;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 5px;
 }
 
-.day {
+/* 共通のグリッド設定（列数・配置の整合） */
+.calendar-header,
+.calendar-grid,
+#calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+}
+
+/* ヘッダー（曜日行）とグリッドは gap を個別に設定して衝突を回避 */
+.calendar-header {
+    gap: 5px;
+    /* 曜日ヘッダー用の隙間（例: 5px） */
+    background-color: #f0f0f0;
+    font-weight: bold;
+    padding: 5px 0;
+    border-bottom: 2px solid #ccc;
+    margin-bottom: 5px;
+}
+
+.calendar-grid {
+    gap: 1px;
+    /* 日付セル間の縦方向の隙間を細かくしたい場合用 */
+}
+
+/* 曜日ラベル */
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.day-label {
+    padding: 5px 0;
+}
+
+.day-label.sunday {
+    color: red;
+}
+
+.day-label.saturday {
+    color: blue;
+}
+
+/* ---- 日付セル ---------------------------- */
+.day,
+.date-cell {
     background: white;
-    padding: 10px;
+    padding: 8px;
     border-radius: 5px;
     border: 1px solid #ddd;
-    height: 90px;
+    box-sizing: border-box;
     cursor: pointer;
     display: flex;
     flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* .day は従来のサイズ指定を維持（既存の見た目優先） */
+.day {
+    width: 120px;
+    height: 120px;
 }
 
 .day:hover {
@@ -36,14 +100,40 @@ body {
 
 .day-number {
     font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 3px;
+}
+
+/* ---- タスク表示 4 件まで ---------------------------- */
+.task-list {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow: hidden;
 }
 
 .task-item {
-    font-size: 12px;
-    margin-top: 4px;
+    font-size: 11px;
+    line-height: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* モーダル */
+/* ---- etc 表示（5件以上） ---------------------------- */
+.etc-indicator {
+    font-size: 12px;
+    color: gray;
+    text-align: right;
+    position: absolute;
+    bottom: 3px;
+    right: 4px;
+    height: 12px;
+    line-height: 12px;
+}
+
+/* ---- モーダル ---------------------------- */
 .modal {
     display: none;
     position: fixed;
@@ -52,7 +142,7 @@ body {
     top: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .modal-content {
@@ -71,9 +161,85 @@ body {
     cursor: pointer;
 }
 
-.day .task-item {
-    font-size: 12px;
+/* 追加の日付セル（高さや余白の別指定がある場合に使用） */
+.date-cell {
+    padding: 10px 5px;
+    height: 60px;
+    border: 1px solid #eee;
+    background-color: white;
+    box-sizing: border-box;
+}
+
+.date-cell.empty {
+    background-color: #fafafa;
+}
+
+/* 曜日ヘッダー（見た目を安定させる） */
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    /* 7列で曜日を均等配置 */
+    align-items: center;
+    justify-items: center;
+    gap: 0;
+    /* セル間は細い境界で表現する */
+    height: 40px;
+    /* ヘッダー高さ（必要に応じて調整） */
+    padding: 0;
+    margin-bottom: 6px;
+    background-color: #fafafa;
+    /* 軽い背景色 */
+    border-bottom: 1px solid #e6e6e6;
+    box-sizing: border-box;
+}
+
+/* 各曜日ラベル */
+.calendar-header .day-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 6px 4px;
+    font-size: 14px;
+    font-weight: 700;
     color: #333;
-    max-height: 50px;   /* 高さ制限 */
-    overflow: hidden;    /* はみ出しは隠す */
+    box-sizing: border-box;
+    user-select: none;
+}
+
+/* 日曜・土曜の色付け（既存と整合） */
+.calendar-header .day-label.sunday {
+    color: #d9534f;
+}
+
+/* 赤系 */
+.calendar-header .day-label.saturday {
+    color: #337ab7;
+}
+
+/* 青系 */
+
+/* セルの区切り（視認性向上） */
+.calendar-header .day-label:not(:last-child) {
+    border-right: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+/* 小さい画面向けにフォントと高さを縮小 */
+@media (max-width: 520px) {
+
+    .calendar-container,
+    #calendar {
+        width: 100%;
+        margin: 10px;
+    }
+
+    .calendar-header {
+        height: 34px;
+    }
+
+    .calendar-header .day-label {
+        font-size: 12px;
+        padding: 4px 2px;
+    }
 }

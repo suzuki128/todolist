@@ -1,7 +1,7 @@
+// ...existing code...
 document.addEventListener("DOMContentLoaded", () => {
-    const calendar = document.getElementById("calendar");
+    const grid = document.getElementById("calendar-grid");
     const monthTitle = document.getElementById("monthTitle");
-
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
 
@@ -14,11 +14,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const addTaskButton = document.getElementById("addTaskButton");
 
     let current = new Date();
-    let tasks = {};
-    // { "2025-12-01": [{name:"タスク名", detail:"詳細"}] }
+    let tasks = {}; // { "YYYY-MM-DD": [{name, detail}, ...] }
 
     function renderCalendar() {
-        calendar.innerHTML = "";
+        grid.innerHTML = "";
 
         const year = current.getFullYear();
         const month = current.getMonth();
@@ -28,10 +27,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const firstDay = new Date(year, month, 1).getDay();
         const lastDate = new Date(year, month + 1, 0).getDate();
 
-        // 空白マス
+        // 空白マス（先頭のズレ）
         for (let i = 0; i < firstDay; i++) {
             const empty = document.createElement("div");
-            calendar.appendChild(empty);
+            empty.className = "date-cell empty";
+            grid.appendChild(empty);
         }
 
         // 日付マス
@@ -39,45 +39,46 @@ document.addEventListener("DOMContentLoaded", () => {
             const cell = document.createElement("div");
             cell.className = "day";
 
-            const key = `${year}-${month + 1}-${date}`;
+            // 曜日クラス（日曜・土曜の色付け用）
+            const dayOfWeek = new Date(year, month, date).getDay();
+            if (dayOfWeek === 0) cell.classList.add("sunday");
+            if (dayOfWeek === 6) cell.classList.add("saturday");
+
+            const key = `${year}-${String(month + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
             const tasksForCell = tasks[key] || [];
 
-            // タスク4つまで表示
-            const visibleTasks = tasksForCell.slice(0, 4);
+            const dn = document.createElement("div");
+            dn.className = "day-number";
+            dn.textContent = date;
+            cell.appendChild(dn);
 
-            const taskDiv = document.createElement("div");
-            taskDiv.className = "task-item";
-            taskDiv.innerHTML = visibleTasks.map(t => `・${t.name || "(無題)"}`).join("<br>");
+            const tdiv = document.createElement("div");
+            tdiv.className = "task-item";
+            tdiv.innerHTML = tasksForCell.slice(0, 4).map(t => "・" + (t.name || "(無題)")).join("<br>");
+            cell.appendChild(tdiv);
 
-            cell.appendChild(document.createElement("div")).className = "day-number";
-            cell.querySelector(".day-number").textContent = date;
-            cell.appendChild(taskDiv);
-
-            // 5個以上なら右下に …etc
             if (tasksForCell.length > 4) {
-                const etcDiv = document.createElement("div");
-                etcDiv.className = "etc-indicator";
-                etcDiv.textContent = "…etc";
-                cell.appendChild(etcDiv);
+                const etc = document.createElement("div");
+                etc.className = "etc-indicator";
+                etc.textContent = "…etc";
+                cell.appendChild(etc);
             }
-        
+
             cell.addEventListener("click", () => openModal(key));
-            calendar.appendChild(cell);
+            grid.appendChild(cell);
         }
     }
 
     function openModal(dateKey) {
         taskModal.style.display = "block";
         modalDate.textContent = dateKey;
-
         renderTaskList(dateKey);
 
         addTaskButton.onclick = () => {
             const name = taskInput.value.trim();
             const detail = detailInput.value.trim();
-
             if (!tasks[dateKey]) tasks[dateKey] = [];
-            tasks[dateKey].push({ name: name, detail: detail });
+            tasks[dateKey].push({ name, detail });
 
             taskInput.value = "";
             detailInput.value = "";
@@ -89,7 +90,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderTaskList(dateKey) {
         taskList.innerHTML = "";
-
         (tasks[dateKey] || []).forEach((task, index) => {
             const li = document.createElement("li");
             li.style.display = "flex";
@@ -101,7 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
             taskSpan.style.fontWeight = "bold";
             taskSpan.style.cursor = "pointer";
 
-            // 詳細表示欄
             const detailDiv = document.createElement("div");
             detailDiv.textContent = task.detail || "";
             detailDiv.style.fontSize = "12px";
@@ -128,7 +127,6 @@ document.addEventListener("DOMContentLoaded", () => {
             li.appendChild(taskSpan);
             li.appendChild(detailDiv);
             li.appendChild(delBtn);
-
             taskList.appendChild(li);
         });
     }
@@ -151,4 +149,3 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderCalendar();
 });
-
