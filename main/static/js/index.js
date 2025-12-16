@@ -14,7 +14,24 @@ document.addEventListener("DOMContentLoaded", () => {
     const addTaskButton = document.getElementById("addTaskButton");
 
     let current = new Date();
-    let tasks = {}; // { "YYYY-MM-DD": [{name, detail}, ...] }
+    let tasks = {}; // { "YYYY-MM-DD": [{id, name, detail}, ...] }
+
+    async function fetchTasksForMonth(year, month) {
+        const mm = String(month + 1).padStart(2, "0");
+        const monthStr = `${year}-${mm}`;
+        try {
+            const res = await fetch(`/api/tasks?month=${monthStr}`);
+            if (!res.ok) throw new Error('failed');
+            const arr = await res.json();
+            tasks = {};
+            arr.forEach(t => {
+                if (!tasks[t.date_key]) tasks[t.date_key] = [];
+                tasks[t.date_key].push({ id: t.id, name: t.name, detail: t.detail });
+            });
+        } catch (e) {
+            console.error('タスク取得に失敗しました', e);
+        }
+    }
 
     function renderCalendar() {
         grid.innerHTML = "";
@@ -74,17 +91,30 @@ document.addEventListener("DOMContentLoaded", () => {
         modalDate.textContent = dateKey;
         renderTaskList(dateKey);
 
-        addTaskButton.onclick = () => {
+        addTaskButton.onclick = async () => {
             const name = taskInput.value.trim();
             const detail = detailInput.value.trim();
-            if (!tasks[dateKey]) tasks[dateKey] = [];
-            tasks[dateKey].push({ name, detail });
+            if (!dateKey) return;
+            try {
+                const res = await fetch('/api/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date_key: dateKey, name, detail })
+                });
+                if (!res.ok) throw new Error('failed');
+                const t = await res.json();
+                if (!tasks[dateKey]) tasks[dateKey] = [];
+                tasks[dateKey].push({ id: t.id, name: t.name, detail: t.detail });
 
-            taskInput.value = "";
-            detailInput.value = "";
+                taskInput.value = "";
+                detailInput.value = "";
 
-            renderCalendar();
-            renderTaskList(dateKey);
+                renderCalendar();
+                renderTaskList(dateKey);
+            } catch (e) {
+                console.error('タスク追加に失敗しました', e);
+                alert('タスクの追加に失敗しました');
+            }
         };
     }
 
@@ -117,11 +147,28 @@ document.addEventListener("DOMContentLoaded", () => {
             delBtn.style.border = "none";
             delBtn.style.background = "transparent";
             delBtn.style.cursor = "pointer";
-            delBtn.onclick = () => {
-                tasks[dateKey].splice(index, 1);
-                if (tasks[dateKey].length === 0) delete tasks[dateKey];
-                renderCalendar();
-                renderTaskList(dateKey);
+            delBtn.onclick = async () => {
+                const taskId = task.id;
+                if (taskId) {
+                    try {
+                        const res = await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' });
+                        if (!res.ok) throw new Error('failed');
+                        // remove from local
+                        tasks[dateKey].splice(index, 1);
+                        if (tasks[dateKey].length === 0) delete tasks[dateKey];
+                        renderCalendar();
+                        renderTaskList(dateKey);
+                    } catch (e) {
+                        console.error('タスク削除に失敗しました', e);
+                        alert('タスクの削除に失敗しました');
+                    }
+                } else {
+                    // fallback local
+                    tasks[dateKey].splice(index, 1);
+                    if (tasks[dateKey].length === 0) delete tasks[dateKey];
+                    renderCalendar();
+                    renderTaskList(dateKey);
+                }
             };
 
             li.appendChild(taskSpan);
@@ -139,13 +186,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     prevBtn.onclick = () => {
         current.setMonth(current.getMonth() - 1);
+        (async () => {
+            await fetchTasksForMonth(current.getFullYear(), current.getMonth());
+            renderCalendar();
+        })();
+    }
+
+    // 初回レンダー時にその月のタスクを取得して描画
+    (async () => {
+        await fetchTasksForMonth(current.getFullYear(), current.getMonth());
         renderCalendar();
-    };
+    })();
 
     nextBtn.onclick = () => {
         current.setMonth(current.getMonth() + 1);
-        renderCalendar();
+        (async () => {
+            await fetchTasksForMonth(current.getFullYear(), current.getMonth());
+            renderCalendar();
+        })();
     };
-
-    renderCalendar();
 });
